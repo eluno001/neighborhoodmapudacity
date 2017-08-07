@@ -31,10 +31,11 @@
 			// We create a map variable
 			var map;
 
+			// we create an infowindow global variable
 			var workshopInfoWindow;
 
-
-			// We create a list for all the locations
+			// We create a list for all the locations. I could not get it to work
+			// in the view model when I did not declare it as an observable.
 			var markers = ko.observableArray([]);
 
 			// We create a JS function to manipulate the map
@@ -48,7 +49,8 @@
 				workshopInfoWindow = new google.maps.InfoWindow();
 				var bounds = new google.maps.LatLngBounds();
 
-
+				// This is the data relative to the workshops that we will displaying
+				// on the map.
 				var workshops = [
 					{name: 'Ateliers Terre Et Feu', location: {lat: 48.828278, lng: 2.323281100000031}, website: 'http://www.terre-et-feu.com/paris-14/'},
 					{name: 'Atlier Baroque', location: {lat: 48.828577, lng: 2.3302197}, website: 'http://www.atelier-baroque.fr/'},
@@ -105,7 +107,9 @@
 							var nearStreetViewLocation =  data.location.latLng;
 							var heading = google.maps.geometry.spherical.computeHeading(
 								nearStreetViewLocation, marker.position);
-							infowindow.setContent('<div>' + marker.title +'</div> <div id="pano"></div> <br> <a href="' + marker.url + '" target="_blank"> Website </a>');
+							infowindow.setContent('<div>' + marker.title +
+								'</div> <div id="pano"></div> <br> <a href="' +
+								marker.url + '" target="_blank"> Website </a>');
 							var panoramaOptions = {
 								position: nearStreetViewLocation,
 								pov: {
@@ -118,11 +122,13 @@
 								document.getElementById('pano'), panoramaOptions);
 							console.log("loog5");
 						}else {
-							infowindow.setContent('<div>' + marker.title + '</div>' + '<div>No Street View Found</div>');
+							infowindow.setContent('<div>' + marker.title + '</div>' +
+								'<div>No Street View Found</div>');
 						};	
 					};
 
-					streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+					streetViewService.getPanoramaByLocation(marker.position, radius,
+						getStreetView);
 					infowindow.open(map, marker);
 				}
 			};
@@ -134,19 +140,16 @@
 				this.markersToShow = ko.computed(function(){
 					var mToShow = [];
 					for (i = 0; i < markers().length; i++){
-						if (markers()[i].title.toLowerCase().indexOf(self.searched().toLowerCase()) >= 0){
+						if (markers()[i].title.toLowerCase().indexOf(
+							self.searched().toLowerCase()) >= 0){
 							mToShow.push(markers()[i]);
 							markers()[i].setVisible(true);
 						} else {
 							markers()[i].setVisible(false);
 						};
-						
 					};
 					return mToShow;
 				});
-				
-
-				
 			};
 
 			ko.applyBindings(listViewModel);
