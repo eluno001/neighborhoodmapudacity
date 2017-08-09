@@ -19,9 +19,9 @@
 			<div class="row">
 				<div id="listView" class="col-md-2">
 				<input data-bind="value: searched, valueUpdate: 'afterkeydown'">
-					<ul data-bind="foreach: markersToShow">
-						<li data-bind="text: title, attr: { id: id}"></li>
-					</ul>
+					<div class="list-group" data-bind="foreach: markersToShow">
+						<a href="#" class="list-group-item list-group-item-action" data-bind="text: title, attr: { id: id} , click: $root.showMarker" attr: {class: 'list-group-item active'}></a>
+					</div>
 				</div>
 				<!-- Create a div to contain the map -->
 				<div id="map" class="col-md-10"></div>
@@ -53,7 +53,7 @@
 				// on the map.
 				var workshops = [
 					{name: 'Ateliers Terre Et Feu', location: {lat: 48.828278, lng: 2.323281100000031}, website: 'http://www.terre-et-feu.com/paris-14/'},
-					{name: 'Atlier Baroque', location: {lat: 48.828577, lng: 2.3302197}, website: 'http://www.atelier-baroque.fr/'},
+					{name: 'Atelier Baroque', location: {lat: 48.828577, lng: 2.3302197}, website: 'http://www.atelier-baroque.fr/'},
 					{name: "Poudre d'éveil", location: {lat: 48.8325271, lng: 2.3228047}, website: 'http://www.atelier-arts-plastiques-paris14.fr/'},
 					{name: 'Workshop Vermeer', location: {lat: 48.8294577, lng: 2.3338498}, website: 'http://www.ateliervermeer.com/'},
 					{name: 'Workshop Boubok', location: {lat: 48.8227633, lng: 2.3351342}, website: 'http://www.atelierboubok.com/'},
@@ -133,13 +133,19 @@
 				}
 			};
 
-			function listViewModel(){
+			function ListViewModel(){
 				var self = this;
+				self.showMarker = function(workshopMarker){
+					console.log(workshopMarker);
+					// google.maps.event.trigger(workshopMarker, 'click');
+					populateInfoWindow(workshopMarker, workshopInfoWindow);
+				};
 
-				this.searched = ko.observable("");
-				this.markersToShow = ko.computed(function(){
+				self.searched = ko.observable("");
+				self.markersToShow = ko.computed(function(){
 					var mToShow = [];
 					for (i = 0; i < markers().length; i++){
+						workshopInfoWindow.close();
 						if (markers()[i].title.toLowerCase().indexOf(
 							self.searched().toLowerCase()) >= 0){
 							mToShow.push(markers()[i]);
@@ -150,15 +156,20 @@
 					};
 					return mToShow;
 				});
+				
+
 			};
 
-			ko.applyBindings(listViewModel);
+			ko.applyBindings(new ListViewModel());
 
 				
 		</script>
 		<!-- Load the google maps js API asynchronously. -->
 		<script async defer  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRzxua2TTljcai_uMvuR-bKGoFppUgEg8&libraries=geometry&v=3&callback=initMap"></script>
-		<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+		<script
+		src="https://code.jquery.com/jquery-3.2.1.js"
+		integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
+		crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 	</body>
