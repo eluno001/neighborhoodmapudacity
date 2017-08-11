@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Painting workshops in the 14th district - Paris</title>
+	<title>Painting museums in the 14th district - Paris</title>
 	<style type="text/css">
 		html, body { height: 100%; margin: 0; padding: 0; }
 		#map { height: 100%; }
@@ -18,13 +18,17 @@
 		<div class="container-fluid">
 			<div class="row">
 				<div id="listView" class="col-md-2">
-				<input data-bind="value: searched, valueUpdate: 'afterkeydown'">
+					<input data-bind="value: searched, valueUpdate: 'afterkeydown'">
 					<div class="list-group" data-bind="foreach: markersToShow">
-						<a href="#" class="list-group-item list-group-item-action" data-bind="text: title, attr: { id: id} , click: $root.showMarker" attr: {class: 'list-group-item active'}></a>
+						<a href="#" data-bind="text: title, attr: { id: id} , click: $root.showMarker, css: $root.isMarker"></a>
 					</div>
 				</div>
 				<!-- Create a div to contain the map -->
-				<div id="map" class="col-md-10"></div>
+				<div id="map" class="col-md-8"></div>
+
+				<div id="wikiView" class="col-md-2">
+					
+				</div>
 			</div>
 		</div>
 		<script>
@@ -32,7 +36,7 @@
 			var map;
 
 			// we create an infowindow global variable
-			var workshopInfoWindow;
+			var museumInfoWindow;
 
 			// We create a list for all the locations. I could not get it to work
 			// in the view model when I did not declare it as an observable.
@@ -46,23 +50,23 @@
 					mapTypeControl: false,
 				});
 
-				workshopInfoWindow = new google.maps.InfoWindow();
+				museumInfoWindow = new google.maps.InfoWindow();
 				var bounds = new google.maps.LatLngBounds();
 
-				// This is the data relative to the workshops that we will displaying
+				// This is the data relative to the museums that we will displaying
 				// on the map.
-				var workshops = [
-					{name: 'Ateliers Terre Et Feu', location: {lat: 48.828278, lng: 2.323281100000031}, website: 'http://www.terre-et-feu.com/paris-14/'},
-					{name: 'Atelier Baroque', location: {lat: 48.828577, lng: 2.3302197}, website: 'http://www.atelier-baroque.fr/'},
-					{name: "Poudre d'éveil", location: {lat: 48.8325271, lng: 2.3228047}, website: 'http://www.atelier-arts-plastiques-paris14.fr/'},
-					{name: 'Workshop Vermeer', location: {lat: 48.8294577, lng: 2.3338498}, website: 'http://www.ateliervermeer.com/'},
-					{name: 'Workshop Boubok', location: {lat: 48.8227633, lng: 2.3351342}, website: 'http://www.atelierboubok.com/'},
+				var museums = [
+					{name: 'Musée de Cluny', location: {lat: 48.850483, lng: 2.344081}, website: 'http://www.musee-moyenage.fr/'},
+					{name: 'Louvre', location: {lat: 48.860611, lng: 2.337644}, website: 'http://www.louvre.fr/en/homepage'},
+					{name: 'Musée d\'Orsay', location: {lat: 48.859961, lng: 2.326561}, website: 'http://www.musee-orsay.fr/en'},
+					{name: "Centre Georges Pompidou", location: {lat: 48.860642, lng: 2.352245}, website: 'https://www.centrepompidou.fr/en'},
+					{name: 'Musée du quai Branly', location: {lat: 48.860889, lng: 2.297894}, website: 'http://www.quaibranly.fr/en/'},
 				];
 
-				for (var i = 0; i < workshops.length; i++){
-					var position = workshops[i].location;
-					var title = workshops[i].name;
-					var url = workshops[i].website;
+				for (var i = 0; i < museums.length; i++){
+					var position = museums[i].location;
+					var title = museums[i].name;
+					var url = museums[i].website;
 					var marker = new google.maps.Marker({
 						map: map,
 						position: position,
@@ -75,7 +79,7 @@
 
 					marker.addListener('click', function(){
 						console.log("log0");
-						populateInfoWindow(this, workshopInfoWindow);
+						populateInfoWindowAndWiki(this, museumInfoWindow);
 						// map.setCenter(this.position);
 					});
 					bounds.extend(markers()[i].position);
@@ -84,7 +88,9 @@
 			};
 
 			
-			function populateInfoWindow(marker, infowindow){
+
+
+			function populateInfoWindowAndWiki(marker, infowindow){
 
 				if (infowindow.marker != marker){
 					infowindow.setContent('');
@@ -130,22 +136,58 @@
 					streetViewService.getPanoramaByLocation(marker.position, radius,
 						getStreetView);
 					infowindow.open(map, marker);
+					wikiSidebar(marker);
+
 				}
 			};
 
-			function ListViewModel(){
-				var self = this;
-				self.showMarker = function(workshopMarker){
-					console.log(workshopMarker);
-					// google.maps.event.trigger(workshopMarker, 'click');
-					populateInfoWindow(workshopMarker, workshopInfoWindow);
-				};
+			function wikiSidebar(marker){
+				$('#wikiView').html("");
+				var wikiUrl = 'http://en.wikipedia.org/w/api.php?'+
+					'action=opensearch&search='+ marker.title + '&format=json&callback=wikiCallack'
+				
+				var wikiRequestTimeout = setTimeout(function(){
+					$('#wikiView').text("failed to get wikipedia resources");
+				},8000);    
 
+				$.ajax({
+					url: wikiUrl,
+					dataType: "jsonp",
+					success: function(response){
+						var articleList = response[1];
+						var summary = response[2];
+
+						articleStr = articleList[0];
+						summaryStr = summary[0];
+						var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+						$('#wikiView').html('<li><a href="' + url + '" target="_blank">' + articleStr + '</a><br><div>' + summaryStr + '</div></li>');
+						
+						clearTimeout(wikiRequestTimeout);
+					}
+				});
+			};
+
+			function ListViewModel(){
+
+				var self = this;
+				self.selectedMuseum = ko.observable(null);
+				self.showMarker = function(museumMarker){
+					console.log(museumMarker.title);
+					self.selectedMuseum(museumMarker);
+					// google.maps.event.trigger(museumMarker, 'click');
+					populateInfoWindowAndWiki(museumMarker, museumInfoWindow);
+					museumMarker.setAnimation(google.maps.Animation.BOUNCE);
+					setTimeout(function()
+						{museumMarker.setAnimation(null); }, 3000);
+				};
+				self.isMarker = ko.computed(function(marker){
+					return self.selectedMuseum == marker ? 'list-group-item active' : 'list-group-item list-group-item-action';
+				});
 				self.searched = ko.observable("");
 				self.markersToShow = ko.computed(function(){
 					var mToShow = [];
 					for (i = 0; i < markers().length; i++){
-						workshopInfoWindow.close();
+						museumInfoWindow.close();
 						if (markers()[i].title.toLowerCase().indexOf(
 							self.searched().toLowerCase()) >= 0){
 							mToShow.push(markers()[i]);
@@ -156,8 +198,6 @@
 					};
 					return mToShow;
 				});
-				
-
 			};
 
 			ko.applyBindings(new ListViewModel());
