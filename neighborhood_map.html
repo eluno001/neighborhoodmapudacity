@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Painting museums in the 14th district - Paris</title>
+	<title>Top Museums in Paris</title>
 	<style type="text/css">
-		html, body { height: 100%; margin: 0; padding: 0; }
+		html, body {
+			height: 100%;
+			margin: 0;
+			padding: 0;
+		}
 		#map, main {
 			width: 100%;
 			height: 100%; 
 		}
-		.container-fluid, .row {height: 100%; }
+		.map_and_panels {
+			height: 100%;
+			overflow: hidden;
+			position: relative;
+		}
 		#listView {
 			height: 100%;
 			width:300px;
@@ -17,10 +25,27 @@
 			transform: translate(-300px, 0);
 			transition: transform 0.3s ease;
 			z-index: 1;
-			background-color: white;
-			padding: 10px; 
+			background-color: #69959c;
+			padding: 10px;
+			margin-left: 10px;
 		}
 		#listView.open {
+			-webkit-transform: translate(0, 0);
+			transform: translate(0, 0);
+		}
+		#wikiView {
+			height: 100%;
+			width:300px;
+			position: absolute;
+			right: 0;
+			-webkit-transform: translate(300px, 0);
+			transform: translate(300px, 0);
+			transition: transform 0.3s ease;
+			z-index: 1;
+			background-color: #f4f4f4;
+			padding: 10px;
+		}
+		#wikiView.open {
 			-webkit-transform: translate(0, 0);
 			transform: translate(0, 0);
 		}
@@ -30,40 +55,54 @@
 		}
 		a#menu svg {
 			position: relative;
-			width: 40px;
+			width: 50px;
 			fill: #000;
+			margin: 5px;
+		}
+		#wikiBtn{
+			position: relative;
+			margin: 10px;
+		}
+		nav {
+			z-index: 1;
 		}
 	</style>
 	<script type="text/javascript" src="js/knockout-3.4.2.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
 </head>
 	<body>
-		<div class="container-fluid">
-			<div class="row">
-				
-				<!-- Create a div to contain the map -->
+		<nav class="row">
+			<div class=" col-4">
 				<a id="menu">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 						<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"></path>
 					</svg>
-			    </a>
-			    <!-- Create a div to contain the list pannel -->
-				<div id="listView">
-					<div class="input-group">
-						<input class="form-control" data-bind="value: searched, valueUpdate: 'afterkeydown'">
-					</div>
-					<hr>
-					<div class="list-group" data-bind="foreach: markersToShow">
-						<a href="#" data-bind="text: title, attr: { id: id} , click: $root.showMarker, css: $root.isMarker"></a>
-					</div>
-				</div>
-			    <main>
-					<div id="map"></div>
-					<!-- Create a div to contain the wikipedia pannel -->
-					<div id="wikiView"></div>
-				</main>
+				</a>
 			</div>
+			<div class="col-4 ml-auto">
+				<button type="button" id="wikiBtn" class="btn btn-outline-dark btn-lg float-right">Wikipedia</button>
+			</div>
+		</nav>
+		
+		<div class="row map_and_panels">
+			<!-- Create a div to contain the list pannel -->
+			<div id="listView">
+				<div class="input-group">
+					<input class="form-control" data-bind="value: searched, valueUpdate: 'afterkeydown'">
+				</div>
+				<hr style="border-color: #f4f4f4; margin-top: 5px; margin-bottom: 5px;">
+				<div class="list-group" data-bind="foreach: markersToShow">
+					<a href="#" class="list-group-item list-group-item-action" data-bind="text: title, attr: { id: id} , click: $root.showMarker"></a>
+				</div>
+			</div>
+		    <main>
+		    	<!-- Create a div to contain the map -->
+				<div id="map"></div>
+			</main>
+			<!-- Create a div to contain the wikipedia pannel -->
+			<div id="wikiView">Please select a Museum on the mark</div>
 		</div>
+	
 		<script>
 			// We create a map variable
 			var map;
@@ -214,9 +253,6 @@
 					setTimeout(function()
 						{museumMarker.setAnimation(null); }, 3000);
 				};
-				self.isMarker = ko.computed(function(marker){
-					return self.selectedMuseum == marker ? 'list-group-item active' : 'list-group-item list-group-item-action';
-				});
 				self.searched = ko.observable("");
 				self.markersToShow = ko.computed(function(){
 					var mToShow = [];
@@ -250,13 +286,25 @@
 			var menu = document.querySelector('#menu');
 			var main = document.querySelector('main');
 			var listView = document.querySelector('#listView');
+			var wikiBtn = document.querySelector('#wikiBtn');
+			var wikiView = document.querySelector('#wikiView');
 
 			menu.addEventListener('click', function(e) {
-		        listView.classList.toggle('open');
+				wikiView.classList.remove('open');
+				listView.classList.toggle('open');
 				e.stopPropagation();
 			});
 			main.addEventListener('click', function() {
 				listView.classList.remove('open');
+			});
+
+			wikiBtn.addEventListener('click', function(e) {
+				listView.classList.remove('open');
+				wikiView.classList.toggle('open');
+				e.stopPropagation();
+			});
+			main.addEventListener('click', function() {
+				wikiView.classList.remove('open');
 			});
 		</script>
 	</body>
