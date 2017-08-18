@@ -1,0 +1,103 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+#map, main {
+	width: 100%;
+	height: 100%; 
+}
+.map_and_panels {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+}
+#listView {
+	height: 100%;
+	width:300px;
+	position: absolute;
+	-webkit-transform: translate(-300px, 0);
+	transform: translate(-300px, 0);
+	transition: transform 0.3s ease;
+	z-index: 1;
+	background-color: #69959c;
+	padding: 10px;
+	margin-left: 10px;
+}
+#listView.open {
+	-webkit-transform: translate(0, 0);
+	transform: translate(0, 0);
+}
+#wikiView {
+	height: 100%;
+	width:300px;
+	position: absolute;
+	right: 0;
+	-webkit-transform: translate(300px, 0);
+	transform: translate(300px, 0);
+	transition: transform 0.3s ease;
+	z-index: 1;
+	background-color: #f4f4f4;
+	padding: 10px;
+}
+#wikiView.open {
+	-webkit-transform: translate(0, 0);
+	transform: translate(0, 0);
+}
+#pano {
+	height: 200px;
+	width: 200px;
+}
+a#menu svg {
+	position: relative;
+	width: 50px;
+	fill: #000;
+	margin: 5px;
+	border-color: white;
+	border-width: 2px;
+}
+#wikiBtn{
+	position: relative;
+	margin: 10px;
+	border-radius: 10px;
+	border-color: white;
+	border-width: 2px;
+}
+#closeWiki, #closeList {
+	margin-bottom: 10px;
+}
+#navBar {
+	width: 100%;
+	position: absolute;
+	z-index: 1;
+	background-color: rgba(255,255,255,0.78);
+}
+#linksWiki {
+	width: 100%;
+	height: 80%;
+	overflow: scroll;
+	background-color: 
+}
+@media screen and (max-width: 500px) {
+	a#menu svg {
+		position: relative;
+		width: 100px;
+		fill: #000;
+		margin: 2vw;
+	}
+	#wikiBtn{
+		font-size: 6vw;
+		margin: 10px;
+		margin-top: 30px;
+	}
+	#wikiView{
+		font-size: 18px;
+	}
+	#navBar {
+	width: 100%;
+	position: absolute;
+	z-index: 1;
+	background-color: rgba(255,255,255,0);
+}
+}
