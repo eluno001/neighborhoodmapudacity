@@ -2,104 +2,8 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Top Museums in Paris</title>
-	<style type="text/css">
-		html, body {
-			height: 100%;
-			margin: 0;
-			padding: 0;
-		}
-		#map, main {
-			width: 100%;
-			height: 100%; 
-		}
-		.map_and_panels {
-			width: 100%;
-			height: 100%;
-			overflow: hidden;
-			position: relative;
-		}
-		#listView {
-			height: 100%;
-			width:300px;
-			position: absolute;
-			-webkit-transform: translate(-300px, 0);
-			transform: translate(-300px, 0);
-			transition: transform 0.3s ease;
-			z-index: 1;
-			background-color: #69959c;
-			padding: 10px;
-			margin-left: 10px;
-		}
-		#listView.open {
-			-webkit-transform: translate(0, 0);
-			transform: translate(0, 0);
-		}
-		#wikiView {
-			height: 100%;
-			width:300px;
-			position: absolute;
-			right: 0;
-			-webkit-transform: translate(300px, 0);
-			transform: translate(300px, 0);
-			transition: transform 0.3s ease;
-			z-index: 1;
-			background-color: #f4f4f4;
-			padding: 10px;
-		}
-		#wikiView.open {
-			-webkit-transform: translate(0, 0);
-			transform: translate(0, 0);
-		}
-		#pano {
-			height: 200px;
-			width: 200px;
-		}
-		a#menu svg {
-			position: relative;
-			width: 50px;
-			fill: #000;
-			margin: 5px;
-		}
-		#wikiBtn{
-			position: relative;
-			margin: 10px;
-			border-radius: 10px;
-			border-color: white;
-			border-width: 5px;
-		}
-		#closeWiki, #closeList {
-			margin-bottom: 10px;
-		}
-		#navBar {
-			width: 100%;
-			position: absolute;
-			z-index: 1;
-		}
-		#linksWiki {
-			width: 100%;
-			height: 80%;
-			overflow: scroll;
-			background-color: 
-		}
-		@media screen and (max-width: 500px) {
-			a#menu svg {
-				position: relative;
-				width: 100px;
-				fill: #000;
-				margin: 2vw;
-			}
-			#wikiBtn{
-				font-size: 6vw;
-				margin: 10px;
-				margin-top: 30px;
-			}
-			#wikiView{
-				font-size: 18px;
-			}
-			
-		}
-	</style>
+	<title>Main Museums in Paris</title>
+	<link rel="stylesheet" type="text/css" href="css/main.css">
 	<script type="text/javascript" src="js/knockout-3.4.2.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -114,14 +18,14 @@
 				</a>
 			</div>
 			<div class="col-4 ml-auto">
-				<button type="button" id="wikiBtn" class="btn btn-dark btn-lg float-right">Wikipedia</button>
+				<button type="button" id="wikiBtn" class="btn btn-dark btn-lg float-right">Infos</button>
 			</div>
 		</nav>
 		
 		<div class="row map_and_panels">
 			<!-- Create a div to contain the list pannel -->
 			<div id="listView">
-				<button type="button" id="closeList" class="btn btn-danger btn-lg"><< Close</button>
+				<button type="button" id="closeList" class="btn btn-danger btn-sm">Close X</button>
 				<br>
 				<div class="input-group">
 					<input class="form-control" data-bind="value: searched, valueUpdate: 'afterkeydown'">
@@ -131,234 +35,20 @@
 					<a href="#" class="list-group-item list-group-item-action" data-bind="text: title, attr: { id: id} , click: $root.showMarker"></a>
 				</div>
 			</div>
-		    <main>
-		    	<!-- Create a div to contain the map -->
+			<main>
+				<!-- Create a div to contain the map -->
 				<div id="map"></div>
 			</main>
 			<!-- Create a div to contain the wikipedia pannel -->
 			<div id="wikiView">
-				<button type="button" id="closeWiki" class="btn btn-danger btn-lg">Close >></button>
+				<button type="button" id="closeWiki" class="btn btn-danger btn-sm">Close X</button>
 				<br>
 				<div id="linksWiki">
 					Please select a Museum on the mark
 				</div>
 			</div>
 		</div>
-	
-		<script>
-			// We create a map variable
-			var map;
-
-			// we create an infowindow global variable
-			var museumInfoWindow;
-
-			// We create a list for all the locations. I could not get it to work
-			// in the view model when I did not declare it as an observable.
-			var markers = ko.observableArray([]);
-
-			// We create a JS function to manipulate the map
-			function initMap(){
-				map = new google.maps.Map(document.getElementById('map'), {
-					center: {lat: 48.8331, lng: 2.3264},
-					zoom: 14,
-					mapTypeControl: false,
-					disableDefaultUI: true,
-					styles : [
-					  {
-					    "featureType": "administrative",
-					    "elementType": "geometry",
-					    "stylers": [
-					      {
-					        "visibility": "off"
-					      }
-					    ]
-					  },
-					  {
-					    "featureType": "poi",
-					    "stylers": [
-					      {
-					        "visibility": "off"
-					      }
-					    ]
-					  },
-					  {
-					    "featureType": "road",
-					    "elementType": "labels.icon",
-					    "stylers": [
-					      {
-					        "visibility": "off"
-					      }
-					    ]
-					  },
-					  {
-					    "featureType": "transit",
-					    "stylers": [
-					      {
-					        "visibility": "off"
-					      }
-					    ]
-					  }
-					]
-				});
-
-				museumInfoWindow = new google.maps.InfoWindow();
-				var bounds = new google.maps.LatLngBounds();
-
-				// This is the data relative to the museums that we will displaying
-				// on the map.
-				var museums = [
-					{name: 'Musée de Cluny', location: {lat: 48.850483, lng: 2.344081}, website: 'http://www.musee-moyenage.fr/'},
-					{name: 'Louvre', location: {lat: 48.860611, lng: 2.337644}, website: 'http://www.louvre.fr/en/homepage'},
-					{name: 'Musée d\'Orsay', location: {lat: 48.859961, lng: 2.326561}, website: 'http://www.musee-orsay.fr/en'},
-					{name: "Centre Georges Pompidou", location: {lat: 48.860642, lng: 2.352245}, website: 'https://www.centrepompidou.fr/en'},
-					{name: 'Musée du quai Branly', location: {lat: 48.860889, lng: 2.297894}, website: 'http://www.quaibranly.fr/en/'},
-				];
-
-				for (var i = 0; i < museums.length; i++){
-					var position = museums[i].location;
-					var title = museums[i].name;
-					var url = museums[i].website;
-					var marker = new google.maps.Marker({
-						map: map,
-						position: position,
-						title: title,
-						animation: google.maps.Animation.DROP,
-						id: "item" + i,
-						url: url,
-					});
-					markers.push(marker);
-
-					marker.addListener('click', function(){
-						console.log("log0");
-						populateInfoWindowAndWiki(this, museumInfoWindow);
-					});
-					bounds.extend(markers()[i].position);
-				}
-				map.fitBounds(bounds);
-			};
-
-			
-
-
-			function populateInfoWindowAndWiki(marker, infowindow){
-
-				if (infowindow.marker != marker){
-					infowindow.setContent('');
-					infowindow.marker = marker;
-										
-					infowindow.addListener('closeclick', function(){
-						infowindow.setMarker = null;
-						infowindow.marker = null;
-					});
-
-					var streetViewService = new google.maps.StreetViewService();
-					var radius = 50;
-
-					console.log("log1");
-
-					function getStreetView(data, status){
-						console.log("log2");
-						if (status == google.maps.StreetViewStatus.OK){
-							console.log("log3");
-							var nearStreetViewLocation =  data.location.latLng;
-							var heading = google.maps.geometry.spherical.computeHeading(
-								nearStreetViewLocation, marker.position);
-							infowindow.setContent('<div>' + marker.title +
-								'</div> <div id="pano"></div> <br> <a href="' +
-								marker.url + '" target="_blank"> Website </a>');
-							var panoramaOptions = {
-								position: nearStreetViewLocation,
-								pov: {
-									heading: heading,
-									pitch: 30
-								}
-							};
-							console.log("log4");
-							var panorama = new google.maps.StreetViewPanorama(
-								document.getElementById('pano'), panoramaOptions);
-							console.log("loog5");
-						}else {
-							infowindow.setContent('<div>' + marker.title + '</div>' +
-								'<div>No Street View Found</div>');
-						};	
-					};
-
-					streetViewService.getPanoramaByLocation(marker.position, radius,
-						getStreetView);
-					map.setCenter(marker.position);
-					infowindow.open(map, marker);
-					wikiSidebar(marker);
-
-				}
-			};
-
-			function wikiSidebar(marker){
-				$('#linksWiki').html("");
-				var wikiUrl = 'http://en.wikipedia.org/w/api.php?'+
-					'action=opensearch&search='+ marker.title + '&format=json&callback=wikiCallack'
-				
-				var wikiRequestTimeout = setTimeout(function(){
-					$('#linksWiki').text("Failed to get wikipedia resources");
-				},8000);    
-
-				$.ajax({
-					url: wikiUrl,
-					dataType: "jsonp",
-					success: function(response){
-						var articleList = response[1];
-						var summary = response[2];
-
-						articleStr = articleList[0];
-						summaryStr = summary[0];
-						var url = 'http://en.wikipedia.org/wiki/' + articleStr;
-						$('#linksWiki').html('<li><a href="' + url + '" target="_blank">' + articleStr + '</a><br><div>' + summaryStr + '</div></li>');
-						if (articleList.length>1){
-							$('#linksWiki').append('<br><br><h5>Other</h5>');
-							for (var i=1; i<articleList.length; i++){
-								link = 'http://en.wikipedia.org/wiki/' + articleList[i];
-								$('#linksWiki').append('<li><a href="' + link +'" target="_blank">' + articleList[i] + '</a></li>');
-							};
-						};
-						clearTimeout(wikiRequestTimeout);
-					}
-				});
-			};
-
-			function ListViewModel(){
-
-				var self = this;
-				self.selectedMuseum = ko.observable(null);
-				self.showMarker = function(museumMarker){
-					console.log(museumMarker.title);
-					self.selectedMuseum(museumMarker);
-					// google.maps.event.trigger(museumMarker, 'click');
-					populateInfoWindowAndWiki(museumMarker, museumInfoWindow);
-					museumMarker.setAnimation(google.maps.Animation.BOUNCE);
-					setTimeout(function()
-						{museumMarker.setAnimation(null); }, 3000);
-					document.querySelector('#listView').classList.remove('open');
-				};
-				self.searched = ko.observable("");
-				self.markersToShow = ko.computed(function(){
-					var mToShow = [];
-					for (i = 0; i < markers().length; i++){
-						museumInfoWindow.close();
-						if (markers()[i].title.toLowerCase().indexOf(
-							self.searched().toLowerCase()) >= 0){
-							mToShow.push(markers()[i]);
-							markers()[i].setVisible(true);
-						} else {
-							markers()[i].setVisible(false);
-						};
-					};
-					return mToShow;
-				});
-			};
-
-			ko.applyBindings(new ListViewModel());
-
-				
-		</script>
+		<script async defer src="js/main.js"></script>
 		<!-- Load the google maps js API asynchronously. -->
 		<script async defer  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRzxua2TTljcai_uMvuR-bKGoFppUgEg8&libraries=geometry&v=3&callback=initMap"></script>
 		<script
@@ -367,38 +57,5 @@
 		crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-		<script>
-			var menu = document.querySelector('#menu');
-			var main = document.querySelector('main');
-			var listView = document.querySelector('#listView');
-			var wikiBtn = document.querySelector('#wikiBtn');
-			var wikiView = document.querySelector('#wikiView');
-			var closeWiki = document.querySelector('#closeWiki');
-			var closeList = document.querySelector('#closeList');
-
-			menu.addEventListener('click', function(e) {
-				wikiView.classList.remove('open');
-				listView.classList.toggle('open');
-				e.stopPropagation();
-			});
-			main.addEventListener('click', function() {
-				listView.classList.remove('open');
-			});
-
-			wikiBtn.addEventListener('click', function(e) {
-				listView.classList.remove('open');
-				wikiView.classList.toggle('open');
-				e.stopPropagation();
-			});
-			main.addEventListener('click', function() {
-				wikiView.classList.remove('open');
-			});
-			closeWiki.addEventListener('click', function() {
-				wikiView.classList.remove('open');
-			});
-			closeList.addEventListener('click', function() {
-				listView.classList.remove('open');
-			});
-		</script>
 	</body>
 </html>
