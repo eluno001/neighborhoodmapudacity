@@ -109,9 +109,7 @@ function initMap(){
 
 		// We add an event listener to populate an infoWindow when we click
 		// on a marker.
-		marker.addListener('click', function(){
-			populateInfoWindowAndWiki(this, museumInfoWindow);
-		})
+		google.maps.event.addListener(marker, "click", openInfoWindowOnClick);
 
 		// We extend the boundaries of the map for it to include each
 		// marker we created.
@@ -127,7 +125,34 @@ function initMap(){
 // This function populates infowindows and generates the content of the
 // wikipedia info panel for a given marker.
 function populateInfoWindowAndWiki(marker, infowindow){
-
+	// This function will be used by the streetViewService (line172)
+	// to get the panoramic view. It sets the heading and the pitch for
+	// the streetView. It also sets the content of the infowindow.
+	function getStreetView(data, status){
+		// Check if a street view was found.
+		if (status == google.maps.StreetViewStatus.OK){
+			var nearStreetViewLocation =  data.location.latLng;
+			var heading = google.maps.geometry.spherical.computeHeading(
+				nearStreetViewLocation, marker.position);
+			infowindow.setContent('<div>' + marker.title +
+				'</div> <div id="pano"></div> <br> <a href="' +
+				marker.url + '" target="_blank"> Website </a>');
+			var panoramaOptions = {
+				position: nearStreetViewLocation,
+				pov: {
+					heading: heading,
+					pitch: 30
+				}
+			};
+			var panorama = new google.maps.StreetViewPanorama(
+				document.getElementById('pano'), panoramaOptions);
+		}else {
+			// In case the server does not find an image show an
+			// error message.
+			infowindow.setContent('<div>' + marker.title + '</div>' +
+				'<div>No Street View Found</div>');
+		}
+	}
 	// We check if the marker does not already have its infowindow open.
 	if (infowindow.marker != marker){
 
@@ -140,7 +165,7 @@ function populateInfoWindowAndWiki(marker, infowindow){
 		infowindow.addListener('closeclick', function(){
 			infowindow.setMarker = null;
 			infowindow.marker = null;
-		})
+		});
 
 		// This variable will allow to find the closest streetView image
 		// given a position and a radius
@@ -150,34 +175,7 @@ function populateInfoWindowAndWiki(marker, infowindow){
 		// streetView image.
 		var radius = 50;
 
-		// This function will be used by the streetViewService variable
-		// to get the panormic view. It sets the heading and the pitch for
-		// the streetView.
-		function getStreetView(data, status){
-			// Check if a street view was found.
-			if (status == google.maps.StreetViewStatus.OK){
-				var nearStreetViewLocation =  data.location.latLng;
-				var heading = google.maps.geometry.spherical.computeHeading(
-					nearStreetViewLocation, marker.position);
-				infowindow.setContent('<div>' + marker.title +
-					'</div> <div id="pano"></div> <br> <a href="' +
-					marker.url + '" target="_blank"> Website </a>');
-				var panoramaOptions = {
-					position: nearStreetViewLocation,
-					pov: {
-						heading: heading,
-						pitch: 30
-					}
-				};
-				var panorama = new google.maps.StreetViewPanorama(
-					document.getElementById('pano'), panoramaOptions);
-			}else {
-				// In case the server does not find an image show an
-				// error message.
-				infowindow.setContent('<div>' + marker.title + '</div>' +
-					'<div>No Street View Found</div>');
-			}
-		}
+
 		// Retrieve the panorama for that position within the radius we set.
 		// The panorama is rendered in the div that has an id of "pano".
 		streetViewService.getPanoramaByLocation(marker.position, radius,
@@ -192,6 +190,11 @@ function populateInfoWindowAndWiki(marker, infowindow){
 	}
 }
 
+// We make the populateInfoWindowAndWiki function take no argument. This will
+// facilitate the use of the function in the initMap function.
+function openInfoWindowOnClick() {
+	populateInfoWindowAndWiki(this, museumInfoWindow);
+}
 
 // Generate the content related to a given marker in the wikipedia info
 // pannel.
@@ -201,7 +204,7 @@ function wikiSidebar(marker){
 	// Rhe url that will be used for the ajax request.
 	var wikiUrl = 'http://en.wikipedia.org/w/api.php?'+
 		'action=opensearch&search='+ marker.title +
-		'&format=json&callback=wikiCallack'
+		'&format=json&callback=wikiCallack';
 
 	// We set a timeout after which a failure message will appear.
 	// This timeout will be cleared if we get an answer from the server
@@ -231,11 +234,11 @@ function wikiSidebar(marker){
 					$('#linksWiki').append(
 						'<li><a href="' + link +'" target="_blank">' +
 						articleList[i] + '</a></li>');
-				};
-			};
+				}
+			}
 			clearTimeout(wikiRequestTimeout);
 		}
-	})
+	});
 }
 
 // A view model that will allow to display a list of the museums and filter
@@ -281,10 +284,10 @@ function ListViewModel(){
 			} else {
 				// Any marker that does not pass the filter is hidden.
 				markers()[i].setVisible(false);
-			};
+			}
 		}
 		return mToShow;
-	})
+	});
 }
 
 // We make sure to apply the bindings using knockout that will keep track of
@@ -305,22 +308,22 @@ menu.addEventListener('click', function(e) {
 	wikiView.classList.remove('open');
 	listView.classList.toggle('open');
 	e.stopPropagation();
-})
+});
 main.addEventListener('click', function() {
 	listView.classList.remove('open');
-})
+});
 
 wikiBtn.addEventListener('click', function(e) {
 	listView.classList.remove('open');
 	wikiView.classList.toggle('open');
 	e.stopPropagation();
-})
+});
 main.addEventListener('click', function() {
 	wikiView.classList.remove('open');
 });
 closeWiki.addEventListener('click', function() {
 	wikiView.classList.remove('open');
-})
+});
 closeList.addEventListener('click', function() {
 	listView.classList.remove('open');
-})
+});
