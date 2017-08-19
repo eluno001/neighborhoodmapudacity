@@ -10,7 +10,7 @@ You can click on markers to open an infowindow with a google streetView. For fur
 ### Prerequisites
 
 In order to run this web application you need:
-* Internet connection to enable the CDNs to retrieve bootstrap and jquery. It also allows to retrieve data from the wikipedia api
+* Internet connection to enable the use of the CDNs of bootstrap and jquery. It also allows to retrieve data from the wikipedia api
 * keep the knockout-3.4.2.js file in the js folder
 * a google maps key while making sure that google streetView is activated on the google console
 
