@@ -15,42 +15,7 @@ function initMap(){
 		center: {lat: 48.8331, lng: 2.3264},
 		zoom: 14,
 		mapTypeControl: false,
-		styles : [
-			{
-				"featureType": "administrative",
-				"elementType": "geometry",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			},
-			{
-				"featureType": "poi",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			},
-			{
-				"featureType": "road",
-				"elementType": "labels.icon",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			},
-			{
-				"featureType": "transit",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			}
-		]
+		styles : map_style,
 	});
 
 	// We create an infoWindow that we store in the global variable
@@ -60,36 +25,6 @@ function initMap(){
 	// The bounds variable will be used later to reajust the boundaries
 	// of the map for them to englobe all the markers.
 	var bounds = new google.maps.LatLngBounds();
-
-	// This is the data relative to the museums that we will displaying
-	// on the map.
-	var museums = [
-		{
-			name: 'Musée de Cluny',
-			location: {lat: 48.850483, lng: 2.344081},
-			website: 'http://www.musee-moyenage.fr/'
-		},
-		{
-			name: 'Louvre',
-			location: {lat: 48.860611, lng: 2.337644},
-			website: 'http://www.louvre.fr/en/homepage'
-		},
-		{
-			name: 'Musée d\'Orsay',
-			location: {lat: 48.859961, lng: 2.326561},
-			website: 'http://www.musee-orsay.fr/en'
-		},
-		{
-			name: 'Centre Georges Pompidou',
-			location: {lat: 48.860642, lng: 2.352245},
-			website: 'https://www.centrepompidou.fr/en'
-		},
-		{
-			name: 'Musée du quai Branly',
-			location: {lat: 48.860889, lng: 2.297894},
-			website: 'http://www.quaibranly.fr/en/'
-		},
-	];
 
 	// We loop through all the museums stores in the variable museum and
 	// create marker elements that we store in the global variable "markers".
@@ -119,6 +54,12 @@ function initMap(){
 	// We make the boundaries of the map include all the markers we looped
 	// through.
 	map.fitBounds(bounds);
+
+	// We make the boundaries of the map include all the markers as user
+	// resizes the screen.
+	google.maps.event.addDomListener(window, 'resize', function() {
+		map.fitBounds(bounds); // `bounds` is a `LatLngBounds` object
+	});
 }
 
 
@@ -182,6 +123,11 @@ function populateInfoWindowAndWiki(marker, infowindow){
 			getStreetView);
 		// Make the map recenter on the marker.
 		map.setCenter(marker.position);
+		// We add animation to the corresponding marker.
+		marker.setAnimation(google.maps.Animation.BOUNCE);
+		// We stop the animation after a certain time.
+		setTimeout(function()
+			{marker.setAnimation(null); }, 3000);
 		// Open the infowindow.
 		infowindow.open(map, marker);
 		// Run the wikiSidebar function on the marker to generate the
@@ -206,40 +152,34 @@ function wikiSidebar(marker){
 		'action=opensearch&search='+ marker.title +
 		'&format=json&callback=wikiCallack';
 
-	// We set a timeout after which a failure message will appear.
-	// This timeout will be cleared if we get an answer from the server
-	// within the time we set.
-	var wikiRequestTimeout = setTimeout(function(){
-		$('#linksWiki').text("Failed to get wikipedia resources");
-	},8000);
-
+	// We make an ajax request. If unsuccessful, it will return an error.
 	$.ajax({
 		url: wikiUrl,
 		dataType: "jsonp",
-		success: function(response){
-			var articleList = response[1];
-			var summary = response[2];
+	}).done(function(response){
+		var articleList = response[1];
+		var summary = response[2];
 
-			articleStr = articleList[0];
-			summaryStr = summary[0];
-			var url = 'http://en.wikipedia.org/wiki/' + articleStr;
-			$('#linksWiki').html(
-				'<li><a href="' + url +
-				'" target="_blank">' + articleStr + '</a><br><div>' +
-				summaryStr + '</div></li>');
-			if (articleList.length>1){
-				$('#linksWiki').append('<br><br><h5>Other</h5>');
-				for (var i=1; i<articleList.length; i++){
-					link = 'http://en.wikipedia.org/wiki/' + articleList[i];
-					$('#linksWiki').append(
-						'<li><a href="' + link +'" target="_blank">' +
-						articleList[i] + '</a></li>');
-				}
+		articleStr = articleList[0];
+		summaryStr = summary[0];
+		var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+		$('#linksWiki').html(
+			'<li><a href="' + url +
+			'" target="_blank">' + articleStr + '</a><br><div>' +
+			summaryStr + '</div></li>');
+		if (articleList.length>1){
+			$('#linksWiki').append('<br><br><h5>Other</h5>');
+			for (var i=1; i<articleList.length; i++){
+				link = 'http://en.wikipedia.org/wiki/' + articleList[i];
+				$('#linksWiki').append(
+					'<li><a href="' + link +'" target="_blank">' +
+					articleList[i] + '</a></li>');
 			}
-			clearTimeout(wikiRequestTimeout);
 		}
-	});
-}
+	}).fail(function(){
+		$('#linksWiki').text("Failed to get wikipedia resources");
+	})
+};
 
 // A view model that will allow to display a list of the museums and filter
 // through them by name.
@@ -257,11 +197,6 @@ function ListViewModel(){
 		// Since this function will be run on click we make it populate
 		// the infoWindow and the wiki pannel.
 		populateInfoWindowAndWiki(museumMarker, museumInfoWindow);
-		// We add animation to the corresponding marker.
-		museumMarker.setAnimation(google.maps.Animation.BOUNCE);
-		// We stop the animation after a certain time.
-		setTimeout(function()
-			{museumMarker.setAnimation(null); }, 3000);
 	};
 	// This variable represents what the user types into the input to
 	// filter results.
@@ -292,7 +227,7 @@ function ListViewModel(){
 
 // We make sure to apply the bindings using knockout that will keep track of
 // any changes in the ListViewModel and apply effectively any needed changes.
-ko.applyBindings(new ListViewModel());
+ko.applyBindings(new ListViewModel(), document.getElementById('listView'));
 
 // We create event listeners to handle the interaction with the list pannel
 // and the wikipedia pannel

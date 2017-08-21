@@ -3,6 +3,14 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
+hr {
+	border-color: #f4f4f4;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+.powered_by{
+	font-size: 10px;
+}
 #map, main {
 	width: 100%;
 	height: 100%; 

@@ -3,9 +3,9 @@
 <head>
 	<meta charset="utf-8">
 	<title>Main Museums in Paris</title>
-	<link rel="stylesheet" type="text/css" href="css/main.css">
 	<script type="text/javascript" src="js/knockout-3.4.2.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 	<body>
@@ -30,7 +30,7 @@
 				<div class="input-group">
 					<input class="form-control" data-bind="value: searched, valueUpdate: 'afterkeydown'">
 				</div>
-				<hr style="border-color: #f4f4f4; margin-top: 5px; margin-bottom: 5px;">
+				<hr>
 				<div class="list-group" data-bind="foreach: markersToShow">
 					<a href="#" class="list-group-item list-group-item-action" data-bind="text: title, attr: { id: id} , click: $root.showMarker"></a>
 				</div>
@@ -47,10 +47,12 @@
 					Please select a Museum on the mark
 				</div>
 				<br>
-				<div style="font-size: 10px;">Powered by Wikipedia</div>
+				<div class="powered_by">Powered by Wikipedia</div>
 			</div>
 		</div>
-		<script async defer src="js/main.js"></script>
+		<script src="js/museum_data.js"></script>
+		<script src="js/map_style.js"></script>
+		<script src="js/main.js"></script>
 		<!-- Load the google maps js API asynchronously. -->
 		<script async defer  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRzxua2TTljcai_uMvuR-bKGoFppUgEg8&libraries=geometry&v=3&callback=initMap"></script>
 		<script
