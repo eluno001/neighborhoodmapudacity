@@ -8,6 +8,8 @@ var museumInfoWindow;
 // on the map.
 var markers = ko.observableArray([]);
 
+
+var selectedMarker = ko.observable();
 // We create the callback function for that will be used by the google
 // maps api.
 function initMap(){
@@ -132,7 +134,7 @@ function populateInfoWindowAndWiki(marker, infowindow){
 		infowindow.open(map, marker);
 		// Run the wikiSidebar function on the marker to generate the
 		// content of the pannel.
-		wikiSidebar(marker);
+		selectedMarker(marker);
 	}
 }
 
@@ -144,42 +146,6 @@ function openInfoWindowOnClick() {
 
 // Generate the content related to a given marker in the wikipedia info
 // pannel.
-function wikiSidebar(marker){
-	// initialize the content of the pannel.
-	$('#linksWiki').html("");
-	// Rhe url that will be used for the ajax request.
-	var wikiUrl = 'http://en.wikipedia.org/w/api.php?'+
-		'action=opensearch&search='+ marker.title +
-		'&format=json&callback=wikiCallack';
-
-	// We make an ajax request. If unsuccessful, it will return an error.
-	$.ajax({
-		url: wikiUrl,
-		dataType: "jsonp",
-	}).done(function(response){
-		var articleList = response[1];
-		var summary = response[2];
-
-		articleStr = articleList[0];
-		summaryStr = summary[0];
-		var url = 'http://en.wikipedia.org/wiki/' + articleStr;
-		$('#linksWiki').html(
-			'<li><a href="' + url +
-			'" target="_blank">' + articleStr + '</a><br><div>' +
-			summaryStr + '</div></li>');
-		if (articleList.length>1){
-			$('#linksWiki').append('<br><br><h5>Other</h5>');
-			for (var i=1; i<articleList.length; i++){
-				link = 'http://en.wikipedia.org/wiki/' + articleList[i];
-				$('#linksWiki').append(
-					'<li><a href="' + link +'" target="_blank">' +
-					articleList[i] + '</a></li>');
-			}
-		}
-	}).fail(function(){
-		$('#linksWiki').text("Failed to get wikipedia resources");
-	})
-};
 
 // A view model that will allow to display a list of the museums and filter
 // through them by name.
@@ -223,42 +189,63 @@ function ListViewModel(){
 		}
 		return mToShow;
 	});
+
+	// We store the appropriate html
+	self.generateWikihtml =  ko.computed(function(){
+		if (selectedMarker() != null) {
+			contentStr = "";
+			var wikiUrl = 'http://en.wikipedia.org/w/api.php?'+
+				'action=opensearch&search='+ selectedMarker.title +
+				'&format=json&callback=wikiCallack';
+			$.ajax({
+				url: wikiUrl,
+				dataType: "jsonp",
+				async: false
+			}).done(function(response){
+				var articleList = response[1];
+				var summary = response[2];
+
+				articleStr = articleList[0];
+				summaryStr = summary[0];
+				var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+				contentStr = contentStr + "<li><a href=\"" + url +
+					"\" target=\"_blank\">" + articleStr + "</a><br><div>" +
+					summaryStr + "</div></li>";
+				if (articleList.length>1){
+					contentStr = contentStr + "<br><br><h5>Other</h5>";
+					for (var i=1; i<articleList.length; i++){
+						link = "http://en.wikipedia.org/wiki/" + articleList[i];
+						contentStr = contentStr + '<li><a href="' +
+						link +"\" target=\"_blank\">" + articleList[i] + "</a></li>";
+					}
+				}
+				return contentStr;
+			}).fail(function(){
+				contentStr = "Failed to get wikipedia resources";
+				return contentStr;
+			})
+		}else {
+			return "Please select a marker";
+		}
+	});
+
+	self.visibleListView = ko.observable(false);
+	self.visibleWikiView = ko.observable(false);
+
+	self.toggle_listView = function(){
+		self.visibleWikiView(false);
+		self.visibleListView(!self.visibleListView());
+	}
+	self.toggle_wikiView = function(){
+		self.visibleListView(false);
+		self.visibleWikiView(!self.visibleWikiView());
+	}
+	self.close_all_pannels = function(){
+		self.visibleListView(false);
+		self.visibleWikiView(false);
+	}
 }
 
 // We make sure to apply the bindings using knockout that will keep track of
 // any changes in the ListViewModel and apply effectively any needed changes.
-ko.applyBindings(new ListViewModel(), document.getElementById('listView'));
-
-// We create event listeners to handle the interaction with the list pannel
-// and the wikipedia pannel
-var menu = document.querySelector('#menu');
-var main = document.querySelector('main');
-var listView = document.querySelector('#listView');
-var wikiBtn = document.querySelector('#wikiBtn');
-var wikiView = document.querySelector('#wikiView');
-var closeWiki = document.querySelector('#closeWiki');
-var closeList = document.querySelector('#closeList');
-
-menu.addEventListener('click', function(e) {
-	wikiView.classList.remove('open');
-	listView.classList.toggle('open');
-	e.stopPropagation();
-});
-main.addEventListener('click', function() {
-	listView.classList.remove('open');
-});
-
-wikiBtn.addEventListener('click', function(e) {
-	listView.classList.remove('open');
-	wikiView.classList.toggle('open');
-	e.stopPropagation();
-});
-main.addEventListener('click', function() {
-	wikiView.classList.remove('open');
-});
-closeWiki.addEventListener('click', function() {
-	wikiView.classList.remove('open');
-});
-closeList.addEventListener('click', function() {
-	listView.classList.remove('open');
-});
+ko.applyBindings(new ListViewModel());

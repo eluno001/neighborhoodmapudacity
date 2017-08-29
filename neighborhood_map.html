@@ -11,21 +11,21 @@
 	<body>
 		<nav id="navBar" class="row">
 			<div class="col-4">
-				<a id="menu">
+				<a id="menu" data-bind="click: toggle_listView">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 						<path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"></path>
 					</svg>
 				</a>
 			</div>
 			<div class="col-4 ml-auto">
-				<button type="button" id="wikiBtn" class="btn btn-dark btn-lg float-right">Infos</button>
+				<button type="button" id="wikiBtn" class="btn btn-dark btn-lg float-right" data-bind=" click: toggle_wikiView">Infos</button>
 			</div>
 		</nav>
 		
 		<div class="row map_and_panels">
 			<!-- Create a div to contain the list pannel -->
-			<div id="listView">
-				<button type="button" id="closeList" class="btn btn-danger btn-sm">Close X</button>
+			<div id="listView" data-bind="css: {open: visibleListView()}">
+				<button type="button" id="closeList" class="btn btn-danger btn-sm" data-bind="click: toggle_listView">Close X</button>
 				<br>
 				<div class="input-group">
 					<input class="form-control" data-bind="value: searched, valueUpdate: 'afterkeydown'">
@@ -35,30 +35,31 @@
 					<a href="#" class="list-group-item list-group-item-action" data-bind="text: title, attr: { id: id} , click: $root.showMarker"></a>
 				</div>
 			</div>
-			<main>
+			<main data-bind="click: close_all_pannels">
 				<!-- Create a div to contain the map -->
 				<div id="map"></div>
 			</main>
 			<!-- Create a div to contain the wikipedia pannel -->
-			<div id="wikiView">
-				<button type="button" id="closeWiki" class="btn btn-danger btn-sm">Close X</button>
+			<div id="wikiView" data-bind="css: {open: visibleWikiView()}">
+				<button type="button" id="closeWiki" class="btn btn-danger btn-sm" data-bind=" click: toggle_wikiView">Close X</button>
 				<br>
-				<div id="linksWiki">
+				<div id="linksWiki" data-bind="html: generateWikihtml">
 					Please select a Museum on the mark
 				</div>
 				<br>
 				<div class="powered_by">Powered by Wikipedia</div>
 			</div>
 		</div>
+		<script
+		src="https://code.jquery.com/jquery-3.2.1.js"
+		integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
+		crossorigin="anonymous"></script>
 		<script src="js/museum_data.js"></script>
 		<script src="js/map_style.js"></script>
 		<script src="js/main.js"></script>
 		<!-- Load the google maps js API asynchronously. -->
 		<script async defer  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRzxua2TTljcai_uMvuR-bKGoFppUgEg8&libraries=geometry&v=3&callback=initMap"></script>
-		<script
-		src="https://code.jquery.com/jquery-3.2.1.js"
-		integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
-		crossorigin="anonymous"></script>
+		
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 	</body>
