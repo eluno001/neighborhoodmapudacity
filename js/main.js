@@ -146,7 +146,9 @@ function openInfoWindowOnClick() {
 
 // Generate the content related to a given marker in the wikipedia info
 // pannel.
+function wikiContent(){
 
+}
 // A view model that will allow to display a list of the museums and filter
 // through them by name.
 function ListViewModel(){
@@ -193,21 +195,26 @@ function ListViewModel(){
 	// We store the appropriate html
 	self.generateWikihtml =  ko.computed(function(){
 		if (selectedMarker() != null) {
-			contentStr = "";
+			var contentStr = "";
 			var wikiUrl = 'http://en.wikipedia.org/w/api.php?'+
-				'action=opensearch&search='+ selectedMarker.title +
+				'action=opensearch&search='+ encodeURI(selectedMarker().title) +
 				'&format=json&callback=wikiCallack';
-			$.ajax({
-				url: wikiUrl,
-				dataType: "jsonp",
-				async: false
-			}).done(function(response){
+
+			function req(){
+				return $.ajax({
+					url: wikiUrl,
+					dataType: "jsonp",
+				});
+			}
+
+			var success = function(response){
 				var articleList = response[1];
 				var summary = response[2];
 
 				articleStr = articleList[0];
 				summaryStr = summary[0];
 				var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+
 				contentStr = contentStr + "<li><a href=\"" + url +
 					"\" target=\"_blank\">" + articleStr + "</a><br><div>" +
 					summaryStr + "</div></li>";
@@ -219,11 +226,17 @@ function ListViewModel(){
 						link +"\" target=\"_blank\">" + articleList[i] + "</a></li>";
 					}
 				}
-				return contentStr;
-			}).fail(function(){
+				// inside the success function the console.log of contentStr is good.
+				console.log(contentStr);
+			};
+
+			var err = function(){
 				contentStr = "Failed to get wikipedia resources";
-				return contentStr;
-			})
+			};
+
+			var promised = req();
+			contentStr = promised.then(success, err);
+			return contentStr
 		}else {
 			return "Please select a marker";
 		}
