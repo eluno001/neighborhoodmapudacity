@@ -146,9 +146,7 @@ function openInfoWindowOnClick() {
 
 // Generate the content related to a given marker in the wikipedia info
 // pannel.
-function wikiContent(){
 
-}
 // A view model that will allow to display a list of the museums and filter
 // through them by name.
 function ListViewModel(){
@@ -234,8 +232,8 @@ function ListViewModel(){
 				contentStr = "Failed to get wikipedia resources";
 			};
 
-			var promised = req();
-			contentStr = promised.then(success, err);
+			var request = req();
+			contentStr = request.then(success, err);
 			return contentStr
 		}else {
 			return "Please select a marker";
