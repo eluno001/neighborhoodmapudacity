@@ -1,3 +1,4 @@
+// This is the styling relative to the map we use.
 var map_style = [
 	{
 		"featureType": "administrative",

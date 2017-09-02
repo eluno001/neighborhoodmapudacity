@@ -8,8 +8,9 @@ var museumInfoWindow;
 // on the map.
 var markers = ko.observableArray([]);
 
-
+// This variable will keep track of the selected marker.
 var selectedMarker = ko.observable();
+
 // We create the callback function for that will be used by the google
 // maps api.
 function initMap(){
@@ -135,17 +136,78 @@ function populateInfoWindowAndWiki(marker, infowindow){
 		// Run the wikiSidebar function on the marker to generate the
 		// content of the pannel.
 		selectedMarker(marker);
+		populateWikiContent();
 	}
 }
 
-// We make the populateInfoWindowAndWiki function take no argument. This will
+// We make the populateInfoWindowAndWiki function take no arguments. This will
 // facilitate the use of the function in the initMap function.
 function openInfoWindowOnClick() {
 	populateInfoWindowAndWiki(this, museumInfoWindow);
 }
 
+// This function defines the
+function req(a_url){
+	return $.ajax({
+		url: a_url,
+		dataType: "jsonp",
+	});
+}
+
 // Generate the content related to a given marker in the wikipedia info
 // pannel.
+function populateWikiContent(){
+	// We check if there is a selected marker or not. If not we ask the user to
+	// select one to see information regarding the corresponding museum.
+	if (selectedMarker() != null) {
+		var wikiUrl = 'http://en.wikipedia.org/w/api.php?'+
+			'action=opensearch&search='+ encodeURI(selectedMarker().title) +
+			'&format=json&callback=wikiCallack';
+
+		// This will be the call back function in case the ajax request
+		// is successful.
+		var success = function(response){
+			var articleList = response[1];
+			var summary = response[2];
+
+			articleStr = articleList[0];
+			summaryStr = summary[0];
+			var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+
+			contentStr = "<li><a href=\"" + url +
+				"\" target=\"_blank\">" + articleStr + "</a><br><div>" +
+				summaryStr + "</div></li>";
+			if (articleList.length>1){
+				contentStr = contentStr + "<br><br><h5>Other</h5>";
+				for (var i=1; i<articleList.length; i++){
+					link = "http://en.wikipedia.org/wiki/" + articleList[i];
+					contentStr = contentStr + '<li><a href="' +
+					link +"\" target=\"_blank\">" + articleList[i] + "</a></li>";
+				}
+			}
+			// We change the generatedWikiHtml variable inside the viewModel in order
+			// to data-bind the content of the wikipedia panel with the generated
+			// string in this ajax request.
+			vm.generatedWikiHtml(contentStr);
+		};
+
+		// This is the error function is case the ajax request fails.
+		var err = function(){
+			var m_error_failure = "Failed to get wikipedia resources";
+			vm.generatedWikiHtml(m_error_failure);
+		};
+
+		// we create the request variable to store the actual ajax request.
+		var request = req(wikiUrl);
+		// We add the success and error functions we decided earlier.
+		var contentStr = request.then(success, err);
+	}else {
+		// In case no marker is selected we prompt the user to select one.
+		var m_select_marker = "Please select a marker";
+		console.log(m_select_marker);
+		vm.generatedWikiHtml(m_select_marker);
+	}
+}
 
 // A view model that will allow to display a list of the museums and filter
 // through them by name.
@@ -191,54 +253,7 @@ function ListViewModel(){
 	});
 
 	// We store the appropriate html
-	self.generateWikihtml =  ko.computed(function(){
-		if (selectedMarker() != null) {
-			var contentStr = "";
-			var wikiUrl = 'http://en.wikipedia.org/w/api.php?'+
-				'action=opensearch&search='+ encodeURI(selectedMarker().title) +
-				'&format=json&callback=wikiCallack';
-
-			function req(){
-				return $.ajax({
-					url: wikiUrl,
-					dataType: "jsonp",
-				});
-			}
-
-			var success = function(response){
-				var articleList = response[1];
-				var summary = response[2];
-
-				articleStr = articleList[0];
-				summaryStr = summary[0];
-				var url = 'http://en.wikipedia.org/wiki/' + articleStr;
-
-				contentStr = contentStr + "<li><a href=\"" + url +
-					"\" target=\"_blank\">" + articleStr + "</a><br><div>" +
-					summaryStr + "</div></li>";
-				if (articleList.length>1){
-					contentStr = contentStr + "<br><br><h5>Other</h5>";
-					for (var i=1; i<articleList.length; i++){
-						link = "http://en.wikipedia.org/wiki/" + articleList[i];
-						contentStr = contentStr + '<li><a href="' +
-						link +"\" target=\"_blank\">" + articleList[i] + "</a></li>";
-					}
-				}
-				// inside the success function the console.log of contentStr is good.
-				console.log(contentStr);
-			};
-
-			var err = function(){
-				contentStr = "Failed to get wikipedia resources";
-			};
-
-			var request = req();
-			contentStr = request.then(success, err);
-			return contentStr
-		}else {
-			return "Please select a marker";
-		}
-	});
+	self.generatedWikiHtml =  ko.observable("Please select a marker");
 
 	self.visibleListView = ko.observable(false);
 	self.visibleWikiView = ko.observable(false);
@@ -246,17 +261,18 @@ function ListViewModel(){
 	self.toggle_listView = function(){
 		self.visibleWikiView(false);
 		self.visibleListView(!self.visibleListView());
-	}
+	};
 	self.toggle_wikiView = function(){
 		self.visibleListView(false);
 		self.visibleWikiView(!self.visibleWikiView());
-	}
+	};
 	self.close_all_pannels = function(){
 		self.visibleListView(false);
 		self.visibleWikiView(false);
-	}
+	};
 }
 
 // We make sure to apply the bindings using knockout that will keep track of
 // any changes in the ListViewModel and apply effectively any needed changes.
-ko.applyBindings(new ListViewModel());
+vm = new ListViewModel();
+ko.applyBindings(vm);

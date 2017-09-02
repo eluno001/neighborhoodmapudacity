@@ -5,7 +5,7 @@ We developped a responsive web application that uses the google maps api in orde
 ## Getting Started
 
 This app can be launched directly by opening the neighborhood_map.html file in a browser. It can also be run on localhost using python by opening the terminal to the main folder and running the following line of code: " python -m SimpleHTTPServer 8080". Now the app can be accessed using the following url: "http://localhost:8080/neighborhood_map.html".
-You can click on markers to open an infowindow with a google streetView. For further info about the museum one click the info button that is on the top-right to open the wikipedia panel which displays the most accurate link to wikipedia as well and a little summary of that article. In case there are more possible links, the "others" section is displayed showing other possible links to other wikipedia article. On the left panel, one can filter through the museums using the input field.
+You can click on markers to open an infowindow with a google streetView. For further info about the museum one click the "Wikipedia infos" button that is on the top-right to open the wikipedia panel which displays the most accurate link to wikipedia as well and a little summary of that article. In case there are more possible links, the "others" section is displayed showing other possible links to other wikipedia article. On the left panel, one can filter through the museums using the input field.
 
 ### Prerequisites
 

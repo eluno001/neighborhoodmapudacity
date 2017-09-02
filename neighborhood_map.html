@@ -18,7 +18,7 @@
 				</a>
 			</div>
 			<div class="col-4 ml-auto">
-				<button type="button" id="wikiBtn" class="btn btn-dark btn-lg float-right" data-bind=" click: toggle_wikiView">Infos</button>
+				<button type="button" id="wikiBtn" class="btn btn-dark btn-lg float-right" data-bind=" click: toggle_wikiView">Wikipedia Infos</button>
 			</div>
 		</nav>
 		
@@ -43,7 +43,7 @@
 			<div id="wikiView" data-bind="css: {open: visibleWikiView()}">
 				<button type="button" id="closeWiki" class="btn btn-danger btn-sm" data-bind=" click: toggle_wikiView">Close X</button>
 				<br>
-				<div id="linksWiki" data-bind="html: generateWikihtml"></div>
+				<div id="linksWiki" data-bind="html: generatedWikiHtml"></div>
 				<br>
 				<div class="powered_by">Powered by Wikipedia</div>
 			</div>
